@@ -1,9 +1,34 @@
+use bevy::prelude::*;
+
+use crate::common;
+
 #[derive(Component)]
 struct Inventory {
-    drugs: Vec<InventoryEntry>,
+    item: Vec<InventoryEntry>,
 }
 
 struct InventoryEntry {
-    item: DrugType,
+    item: common::DrugType,
     count: usize,
+}
+
+pub struct HustlersPlugin;
+
+impl Plugin for HustlersPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_startup_system(add_hustlers);
+    }
+}
+
+fn add_hustlers(mut commands: Commands) {
+    commands.spawn((
+        common::Location,
+        common::Name("Hippie Fugitive".to_string()),
+        Inventory {
+            item: vec![InventoryEntry {
+                item: common::DrugType::Cocaine,
+                count: 420,
+            }],
+        },
+    ));
 }
