@@ -1,1 +1,5 @@
 # ryo
+
+```sh
+cargo run
+```
