@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 bevy = { version = "0.9.1", features = ["dynamic"] }
+bevy-inspector-egui = "0.15"
 kayak_ui = "0.2"
 
 # Enable a small amount of optimization in debug mode
