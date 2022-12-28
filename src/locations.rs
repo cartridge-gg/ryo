@@ -8,7 +8,7 @@ use crate::common;
 struct Tradeable;
 
 #[derive(Inspectable, Component, Default)]
-struct Market {
+pub struct Market {
     pairs: Vec<MarketPair>,
 }
 
@@ -18,18 +18,18 @@ struct MarketPair {
     amount: usize,
 }
 
-pub struct MarketsPlugin;
+pub struct LocationsPlugin;
 
-impl Plugin for MarketsPlugin {
+impl Plugin for LocationsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(add_markets)
+        app.add_startup_system(spawn_locations)
             .register_inspectable::<Tradeable>()
             .register_inspectable::<Market>()
             .register_inspectable::<MarketPair>();
     }
 }
 
-fn add_markets(mut commands: Commands) {
+fn spawn_locations(mut commands: Commands) {
     commands.spawn((
         common::Location,
         common::Name("Brooklyn".to_string()),
@@ -113,12 +113,8 @@ pub struct MarketProps {
     pub name: String,
 }
 
-// In the future this will tell Kayak that these Props belongs to a widget.
-// For now it's use to get the `WidgetName` component.
 impl Widget for MarketProps {}
 
-// Now we need a widget bundle this can represent a collection of components our widget might have
-// Note: You can include custom data here. Just don't expect it to get diffed during update!
 #[derive(Bundle)]
 pub struct MarketBundle {
     pub props: MarketProps,

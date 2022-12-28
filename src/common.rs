@@ -4,6 +4,12 @@ use bevy_inspector_egui::{Inspectable, RegisterInspectable};
 #[derive(Inspectable, Component, Default)]
 pub struct Name(pub String);
 
+impl std::fmt::Display for Name {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
 #[derive(Inspectable, Component, Default)]
 pub struct Location;
 
