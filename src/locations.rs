@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use bevy_console::{reply, AddConsoleCommand, ConsoleCommand};
 use bevy_inspector_egui::{Inspectable, RegisterInspectable};
 use kayak_ui::prelude::{widgets::*, *};
+use rand::Rng;
 
 use crate::common;
 
@@ -13,10 +14,57 @@ pub struct Market {
     pairs: Vec<MarketPair>,
 }
 
-#[derive(Inspectable, Component, Default)]
+#[derive(Inspectable, Component)]
 struct MarketPair {
     drug: common::DrugType,
-    amount: usize,
+    stash: f64,
+    wad: f64,
+}
+
+impl MarketPair {
+    fn buy_price(&self, wad: f64) -> f64 {
+        (self.stash * wad) / (self.wad * wad)
+    }
+
+    fn buy(&mut self, wad: f64) -> f64 {
+        let pre_stash = self.stash;
+        let pre_wad = self.wad;
+
+        let stash = (pre_stash * wad) / (pre_wad * wad);
+        self.stash -= stash;
+        self.wad += wad;
+
+        assert!(pre_stash + pre_wad + wad == self.stash + self.wad + stash);
+
+        stash
+    }
+
+    fn sell_price(&self, stash: f64) -> f64 {
+        (self.wad * stash) / (self.stash * stash)
+    }
+
+    fn sell(&mut self, stash: f64) -> f64 {
+        let pre_stash = self.stash;
+        let pre_wad = self.wad;
+
+        let wad = self.wad * stash / (self.stash * stash);
+        self.stash += stash;
+        self.wad -= wad;
+
+        assert!(pre_stash + pre_wad + stash == self.stash + self.wad + wad);
+
+        wad
+    }
+}
+
+impl Default for MarketPair {
+    fn default() -> Self {
+        Self {
+            drug: common::DrugType::Weed,
+            stash: f64::from(rand::thread_rng().gen_range(0..69)),
+            wad: f64::from(rand::thread_rng().gen_range(0..420)),
+        }
+    }
 }
 
 pub struct LocationsPlugin;
@@ -37,71 +85,71 @@ fn build_market() -> Market {
         pairs: vec![
             MarketPair {
                 drug: common::DrugType::Weed,
-                amount: 100,
+                ..Default::default()
             },
             MarketPair {
                 drug: common::DrugType::Cocaine,
-                amount: 100,
+                ..Default::default()
             },
             MarketPair {
                 drug: common::DrugType::Ludes,
-                amount: 100,
+                ..Default::default()
             },
             MarketPair {
                 drug: common::DrugType::Acid,
-                amount: 100,
+                ..Default::default()
             },
             MarketPair {
                 drug: common::DrugType::Speed,
-                amount: 100,
+                ..Default::default()
             },
             MarketPair {
                 drug: common::DrugType::Heroin,
-                amount: 100,
+                ..Default::default()
             },
             MarketPair {
                 drug: common::DrugType::Oxycontin,
-                amount: 100,
+                ..Default::default()
             },
             MarketPair {
                 drug: common::DrugType::Zoloft,
-                amount: 100,
+                ..Default::default()
             },
             MarketPair {
                 drug: common::DrugType::Fentanyl,
-                amount: 100,
+                ..Default::default()
             },
             MarketPair {
                 drug: common::DrugType::Krokodil,
-                amount: 100,
+                ..Default::default()
             },
             MarketPair {
                 drug: common::DrugType::Crack,
-                amount: 100,
+                ..Default::default()
             },
             MarketPair {
                 drug: common::DrugType::Pcp,
-                amount: 100,
+                ..Default::default()
             },
             MarketPair {
                 drug: common::DrugType::Shrooms,
-                amount: 100,
+                ..Default::default()
             },
             MarketPair {
                 drug: common::DrugType::Soma,
-                amount: 100,
+                ..Default::default()
             },
             MarketPair {
                 drug: common::DrugType::Xanax,
-                amount: 100,
+                ..Default::default()
             },
             MarketPair {
                 drug: common::DrugType::Molly,
-                amount: 100,
+                ..Default::default()
             },
             MarketPair {
                 drug: common::DrugType::Adderall,
-                amount: 100,
+                ..Default::default()
             },
         ],
     }
@@ -165,7 +213,12 @@ fn markets_command(
         for (market, location) in markets.iter() {
             let mut pairs = String::new();
             for (i, pair) in market.pairs.iter().enumerate() {
-                pairs += &format!(" {i}. {}\n", pair.drug)
+                pairs += &format!(
+                    " {i}. {:}\t\tBuy: ${:.2},\tSell: ${:.2}\n",
+                    pair.drug,
+                    pair.buy_price(1.0),
+                    pair.sell_price(1.0)
+                )
             }
             reply!(log, "[{}] {}\n{}", location.symbol, location.name, pairs);
         }

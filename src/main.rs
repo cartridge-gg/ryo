@@ -1,7 +1,5 @@
 use bevy::{prelude::*, winit::WinitSettings};
-use bevy_console::{
-    reply, AddConsoleCommand, ConsoleCommand, ConsoleConfiguration, ConsolePlugin, PrintConsoleLine,
-};
+use bevy_console::{ConsoleConfiguration, ConsolePlugin, PrintConsoleLine};
 use bevy_inspector_egui::WorldInspectorPlugin;
 use kayak_ui::prelude::{widgets::*, *};
 
