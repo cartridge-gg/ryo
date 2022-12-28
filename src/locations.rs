@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use bevy_console::{reply, AddConsoleCommand, ConsoleCommand};
 use bevy_inspector_egui::{Inspectable, RegisterInspectable};
 use kayak_ui::prelude::{widgets::*, *};
+use prettytable::{format, Table};
 use rand::Rng;
 
 use crate::common;
@@ -22,8 +23,8 @@ struct MarketPair {
 }
 
 impl MarketPair {
-    fn buy_price(&self, wad: f64) -> f64 {
-        (self.stash * wad) / (self.wad * wad)
+    fn buy_price(&self, stash: f64) -> f64 {
+        (self.wad * stash) / (self.stash - stash)
     }
 
     fn buy(&mut self, wad: f64) -> f64 {
@@ -40,7 +41,7 @@ impl MarketPair {
     }
 
     fn sell_price(&self, stash: f64) -> f64 {
-        (self.wad * stash) / (self.stash * stash)
+        (self.wad * stash) / (self.stash - stash)
     }
 
     fn sell(&mut self, stash: f64) -> f64 {
@@ -203,24 +204,42 @@ fn locations_command(
 /// Prints out the locations.
 #[derive(ConsoleCommand)]
 #[console_command(name = "markets")]
-struct MarketsCommand {}
+struct MarketsCommand {
+    /// Quantity to quote for.
+    quantity: Option<f64>,
+}
 
 fn markets_command(
     mut log: ConsoleCommand<MarketsCommand>,
     markets: Query<(&Market, &common::Location)>,
 ) {
-    if let Some(Ok(MarketsCommand {})) = log.take() {
+    if let Some(Ok(MarketsCommand { quantity })) = log.take() {
+        let q = match quantity {
+            Some(x) => x,
+            None => 1.0,
+        };
+
         for (market, location) in markets.iter() {
-            let mut pairs = String::new();
+            let mut table = Table::new();
+            table.set_format(*format::consts::FORMAT_NO_BORDER_LINE_SEPARATOR);
+            table.set_titles(row!["", "DRUG", "STASH", "WAD", "QUOTE"]);
+
             for (i, pair) in market.pairs.iter().enumerate() {
-                pairs += &format!(
-                    " {i}. {:}\t\tBuy: ${:.2},\tSell: ${:.2}\n",
+                table.add_row(row![
+                    i,
                     pair.drug,
-                    pair.buy_price(1.0),
-                    pair.sell_price(1.0)
-                )
+                    pair.stash,
+                    pair.wad,
+                    format!("${:.2}", pair.buy_price(q)),
+                ]);
             }
-            reply!(log, "[{}] {}\n{}", location.symbol, location.name, pairs);
+            reply!(
+                log,
+                "\n\t\t\t[{}] {}\n\n{}",
+                location.symbol,
+                location.name,
+                table.to_string()
+            );
         }
 
         log.ok();

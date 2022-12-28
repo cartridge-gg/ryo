@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate prettytable;
+
 use bevy::{prelude::*, winit::WinitSettings};
 use bevy_console::{ConsoleConfiguration, ConsolePlugin, PrintConsoleLine};
 use bevy_inspector_egui::WorldInspectorPlugin;
