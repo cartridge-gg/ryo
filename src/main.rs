@@ -39,31 +39,11 @@ fn main() {
         .add_plugin(hustlers::HustlersPlugin)
         .add_plugin(locations::LocationsPlugin)
         .add_startup_system(write_to_console)
-        .add_console_command::<LogCommand, _>(log_command)
         .run();
 }
 
 fn write_to_console(mut console_line: EventWriter<PrintConsoleLine>) {
     console_line.send(PrintConsoleLine::new("Welcome hustler".to_string()));
-}
-
-/// Prints out the locations.
-#[derive(ConsoleCommand)]
-#[console_command(name = "locations")]
-struct LogCommand {}
-
-fn log_command(
-    mut log: ConsoleCommand<LogCommand>,
-    locations: Query<(&common::Name, &common::Location, &locations::Market)>,
-) {
-    if let Some(Ok(LogCommand {})) = log.take() {
-        for (i, e) in locations.iter().enumerate() {
-            let name = e.0;
-            reply!(log, "\t{i}. {name}");
-        }
-
-        log.ok();
-    }
 }
 
 fn startup(
@@ -83,10 +63,10 @@ fn startup(
         button::primary_button_render,
     );
 
-    widget_context.add_widget_data::<locations::MarketProps, EmptyState>();
+    widget_context.add_widget_data::<locations::LocationProps, EmptyState>();
     widget_context.add_widget_system(
-        locations::MarketProps::default().get_name(),
-        widget_update::<locations::MarketProps, EmptyState>,
+        locations::LocationProps::default().get_name(),
+        widget_update::<locations::LocationProps, EmptyState>,
         locations::render_location,
     );
 
@@ -105,7 +85,7 @@ fn startup(
             //     }}
             // >
             //     <locations::MarketBundle
-            //         props={locations::MarketProps{
+            //         props={locations::LocationProps{
             //             name: "Brooklyn".into()
             //         }}
             //     />

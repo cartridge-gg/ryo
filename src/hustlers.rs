@@ -27,7 +27,6 @@ impl Plugin for HustlersPlugin {
 
 fn add_player(mut commands: Commands) {
     commands.spawn((
-        common::Location,
         common::Name("Hippie Fugitive Player".to_string()),
         Inventory {
             item: vec![InventoryEntry {
@@ -40,7 +39,6 @@ fn add_player(mut commands: Commands) {
 
 fn add_hustlers(mut commands: Commands) {
     commands.spawn((
-        common::Location,
         common::Name("Hippie Fugitive".to_string()),
         Inventory {
             item: vec![InventoryEntry {
