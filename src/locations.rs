@@ -138,7 +138,7 @@ impl Default for MarketBundle {
     }
 }
 
-pub fn market_render(
+pub fn render_location(
     In((widget_context, entity)): In<(KayakWidgetContext, Entity)>,
     mut commands: Commands,
     query: Query<&MarketProps>,
